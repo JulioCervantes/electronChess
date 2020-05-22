@@ -1,3 +1,20 @@
+pgnData = null;// Or read last pgn opened
+
+function loadPgnFromWindow(gamesArray){
+  console.log("processing file");
+  pgnData = gamesArray;
+  $('#gameSelect').empty();
+  for (var i = 0; i < pgnData.length; i++) {
+    var g = new Chess();
+    g.load_pgn(pgnData[i].join('\n'), {newline_char:'\n'});
+    var h = g.header();
+    $('#gameSelect')
+    .append($('<option></option>')
+    .attr('value', i)
+    .text(h.White + ' - ' + h.Black + ', ' + h.Event + ' ' + h.Site + ' ' + h.Date));
+  }
+  loadGame(0);
+}
 
 function readPgn(fileName) {
 
@@ -40,7 +57,7 @@ function readPgn(fileName) {
 
 }
 
-pgnData = readPgn('./pgns/pgns.pgn');
+//pgnData = readPgn('./pgns/pgns.pgn'); You need to allow select pgn
 
 //Write the game to the DOM
 function writeGameText(g) {
@@ -95,6 +112,15 @@ $('#btnEnd').on('click', function() {
     game.move(gameHistory[currentPly].san);
   }
   board.position(game.fen());
+});
+
+$(window).bind('mousewheel', function(event) {
+  if (event.originalEvent.wheelDelta >= 0) {
+    $('#btnNext').click();
+  }
+  else {
+    $('#btnPrevious').click();
+  }
 });
 
 //key bindings
@@ -190,16 +216,18 @@ var board, //the chessboard
 
 //only need the headers here, issue raised on github
 //read all the games to populate the select
-for (var i = 0; i < pgnData.length; i++) {
-  var g = new Chess();
-  g.load_pgn(pgnData[i].join('\n'), {newline_char:'\n'});
-  var h = g.header();
-  $('#gameSelect')
-     .append($('<option></option>')
-     .attr('value', i)
-     .text(h.White + ' - ' + h.Black + ', ' + h.Event + ' ' + h.Site + ' ' + h.Date));
+if(!!pgnData){
+  for (var i = 0; i < pgnData.length; i++) {
+    var g = new Chess();
+    g.load_pgn(pgnData[i].join('\n'), {newline_char:'\n'});
+    var h = g.header();
+    $('#gameSelect')
+    .append($('<option></option>')
+    .attr('value', i)
+    .text(h.White + ' - ' + h.Black + ', ' + h.Event + ' ' + h.Site + ' ' + h.Date));
+  }
 }
-
+  
 //set up the board
 var cfg = {
   pieceTheme: './chessboardjs/img/chesspieces/wikipedia/{piece}.png',
@@ -211,4 +239,4 @@ board = new ChessBoard('board', cfg);
 $(window).resize(board.resize);
 
 //load the first game
-loadGame(0);
+//loadGame(0);

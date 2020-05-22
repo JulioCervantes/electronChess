@@ -1,8 +1,5 @@
-const electron = require('electron')
-// Module to control application life.
-const app = electron.app
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
+const { app, BrowserWindow, Menu, dialog } = require('electron');
+const { loadPgnFromFile } = require('./pgn_reader');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -10,7 +7,7 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
+  mainWindow = new BrowserWindow({width: 2480, height: 1240})
 
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`)
@@ -25,6 +22,60 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+
+    //Menu
+const isMac = process.platform === 'darwin';
+
+const template = [
+  // { role: 'appMenu' }
+  ...(isMac ? [{
+    label: app.name,
+    submenu: [
+      { role: 'about' },
+      { type: 'separator' },
+      { role: 'services' },
+      { type: 'separator' },
+      { role: 'hide' },
+      { role: 'hideothers' },
+      { role: 'unhide' },
+      { type: 'separator' },
+      { role: 'quit' }
+    ]
+  }] : []),
+  // { role: 'fileMenu' }
+  {
+    label: 'File',
+    submenu: [
+      { label:'Open pgn file...', role: 'open',click: 
+          async () =>{
+            dialog.showOpenDialog(mainWindow,{
+              properties: ['openFile']
+            }).then(result => {
+              console.log(result.canceled)
+              console.log(result.filePaths)
+              console.log(result);
+              if(result){
+                loadPgnFromFile(result.filePaths[0]).then(result=>{
+                  mainWindow.webContents.executeJavaScript(`loadPgnFromWindow(${JSON.stringify(result)})`);
+                })
+              }
+            }).catch(err => {
+              console.log(err)
+            })
+          }
+      },
+      isMac ? { role: 'close' } : { role: 'quit' }
+    ]
+  },
+];
+
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
+
+
+
+
 }
 
 // This method will be called when Electron has finished
