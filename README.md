@@ -1,5 +1,6 @@
-Electron Chess
+Electron Chess 
 ==============
+Original project: https://github.com/svazzole/electronChess.git
 
 A simple PGN viewer with chessboard.js and chess.js platform independent.
 
@@ -9,7 +10,7 @@ A simple PGN viewer with chessboard.js and chess.js platform independent.
 ## Install
 
 ```
-git clone https://github.com/svazzole/electronChess.git
+git clone https://github.com/JulioCervantes/electronChess.git
 cd electronChess
 npm install && npm start
 ```
